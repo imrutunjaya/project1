@@ -12,7 +12,7 @@
   body, html {
     margin: 0; padding: 0; height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa;
+    background: #fff;
     color: #111;
     display: flex;
     flex-direction: column;
@@ -22,7 +22,7 @@
     flex: 1;
     min-height: 0;
   }
-  /* Login/signup screen - white background with elegant styling */
+  /* Login/signup screen */
   #login-screen {
     display: flex;
     flex-direction: column;
@@ -43,7 +43,6 @@
     margin-bottom: 1.5rem;
     gap: 1rem;
   }
-  /* Tab buttons distinct */
   .tab-button {
     display: flex;
     align-items: center;
@@ -55,9 +54,9 @@
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    box-shadow: 0 0 4px transparent;
+    box-shadow: none;
     user-select: none;
-    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.2s ease, color 0.2s ease;
     border: 2px solid transparent;
   }
   .tab-button svg {
@@ -70,10 +69,10 @@
     color: #222;
   }
   .tab-button.active {
-    background: #667eea;
+    background: #3f51b5;
     color: #fff;
-    box-shadow: 0 5px 18px rgba(102, 126, 234, 0.4);
-    border-color: #4b54d4;
+    border-color: #2c3a9a;
+    box-shadow: none;
   }
   /* Forms */
   form {
@@ -83,7 +82,7 @@
     background: #fafafa;
     padding: 2rem 2.5rem 2.5rem;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.12);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
   }
   form input[type="text"],
   form input[type="password"] {
@@ -94,17 +93,15 @@
     font-size: 1rem;
     background: #fff;
     color: #111;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: border-color 0.2s ease;
   }
   form input[type="text"]:focus,
   form input[type="password"]:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 8px #99aaff;
+    border-color: #3f51b5;
   }
   form button {
-    background: #667eea;
+    background: #3f51b5;
     color: #fff;
     font-weight: 700;
     padding: 0.85rem 1.2rem;
@@ -114,48 +111,51 @@
     font-size: 1.1rem;
     letter-spacing: 0.05em;
     user-select: none;
-    box-shadow: 0 5px 10px rgba(102,126,234,0.5);
-    transition: background 0.3s ease, box-shadow 0.4s ease;
+    transition: background 0.3s ease;
+    margin-top: 10px;
   }
   form button:hover {
-    background: #4b54d4;
-    box-shadow: 0 8px 18px rgba(75,84,212,0.8);
+    background: #2c3a9a;
   }
   #form-message {
     margin-top: 1rem;
     font-size: 0.95rem;
     min-height: 1.4em;
     text-align: center;
-    color: #d9534f;
+    color: #d32f2f;
     user-select: none;
     font-weight: 600;
   }
-  /* Layout */
+  /* Sidebar */
   #sidebar {
-    width: 280px;
-    background: #282c34;
-    color: white;
+    width: 320px;
+    background: #f9f9f9;
+    color: #333;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid #ddd;
   }
   #sidebar header {
     padding: 1rem;
     font-size: 1.25rem;
     font-weight: 700;
-    background: #20232a;
+    background: #fff;
     text-align: center;
     user-select: none;
+    border-bottom: 1px solid #ddd;
   }
   #search-container {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid #ddd;
   }
   #search-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
     border-radius: 5px;
-    border: none;
+    border: 1px solid #bbb;
     font-size: 1rem;
+    color: #222;
   }
   #notes-list {
     flex-grow: 1;
@@ -166,38 +166,57 @@
   }
   #notes-list li {
     cursor: pointer;
-    padding: 0.9rem 1rem;
-    border-bottom: 1px solid #444;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #ddd;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     user-select: none;
-  }
-  #notes-list li.selected {
-    background: #4c5c9f;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: background-color 0.15s ease;
   }
   #notes-list li:hover {
-    background: #3d4a82;
+    background: #e1e7fc;
+  }
+  #notes-list li.selected {
+    background: #c5cee9;
+    font-weight: 600;
+  }
+  .note-title-highlight {
+    background-color: #f9f5c6;
+    border-radius: 3px;
+    padding: 0 2px;
+    color: #333;
+  }
+  .note-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    color: #666;
   }
   #btn-new-note {
-    background: #4c5c9f;
+    background: #3f51b5;
     border: none;
     width: 100%;
-    padding: 0.85rem;
+    padding: 0.75rem;
     font-weight: bold;
     letter-spacing: 0.05em;
     cursor: pointer;
     color: white;
-    transition: background 0.3s ease;
+    transition: background 0.25s ease;
+    flex-shrink: 0;
+    border-radius: 0;
   }
   #btn-new-note:hover {
-    background: #6878d1;
+    background: #2c3a9a;
   }
+  /* Main content */
   #main-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    background: white;
+    background: #fff;
     padding: 1rem 1.5rem;
     min-width: 0;
   }
@@ -206,7 +225,7 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid #3f51b5;
     padding-bottom: 0.3rem;
     outline: none;
     width: 100%;
@@ -228,40 +247,48 @@
   }
   #note-actions {
     padding-top: 0.75rem;
-    text-align: right;
     display: flex;
+    justify-content: flex-end;
     gap: 16px;
   }
-  /* Icon buttons */
   .icon-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
-    transition: background-color 0.2s ease;
-    color: #667eea;
+    transition: background-color 0.15s ease;
+    color: #3f51b5;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .icon-button:hover:not(:disabled) {
-    background-color: #d0d5ff;
+    background-color: #d8dffb;
   }
   .icon-button:disabled {
     color: #aaa;
     cursor: default;
   }
   .icon-button svg {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     fill: currentColor;
   }
   #logout-btn {
-    background: #a83232;
+    background: #b00020;
     font-weight: 700;
     margin-top: auto;
     border-radius: 0;
+    flex-shrink: 0;
+    padding: 0.85rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  #logout-btn:hover {
+    background: #7a0015;
   }
   /* Scrollbar styling */
   ::-webkit-scrollbar {
@@ -269,19 +296,19 @@
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #282c34;
+    background: #f0f0f0;
   }
   ::-webkit-scrollbar-thumb {
-    background: #555;
+    background: #c1c1c1;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #777;
+    background: #a0a0a0;
   }
   /* Responsive */
   @media (max-width: 768px) {
     #sidebar {
-      width: 200px;
+      width: 240px;
     }
     #login-screen form {
       width: 90vw;
@@ -308,14 +335,12 @@
     <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required aria-required="true" />
     <button type="submit">Login</button>
   </form>
-
   <form id="signup-form" style="display: none;" aria-labelledby="tab-signup" autocomplete="off" novalidate>
     <input type="text" id="signup-username" placeholder="Username" autocomplete="username" required aria-required="true" />
     <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" required aria-required="true" />
     <input type="password" id="signup-password-confirm" placeholder="Confirm Password" autocomplete="new-password" required aria-required="true" />
     <button type="submit">Sign Up</button>
   </form>
-
   <div id="form-message" role="alert" aria-live="assertive"></div>
 </div>
 
@@ -334,11 +359,13 @@
     <textarea id="note-content" placeholder="Start typing your note here..." aria-label="Note content"></textarea>
     <div id="note-actions">
       <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note">
+        <!-- Improved floppy disk icon -->
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM12 12a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"></path>
+          <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM9 9h6v6H9V9z"></path>
         </svg>
       </button>
-      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d9534f;">
+      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d32f2f;">
+        <!-- Improved trash bin icon -->
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"></path>
         </svg>
@@ -379,6 +406,19 @@
   let filteredNotes = [];
   let selectedNoteId = null;
   let noteSaved = false;
+  let searchTimeout = null;
+
+  function formatDate(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  }
 
   function generateId() {
     return 'id-' + Math.random().toString(36).slice(2);
@@ -458,7 +498,7 @@
     loginForm.setAttribute('aria-hidden', 'false');
     signupForm.style.display = 'none';
     signupForm.setAttribute('aria-hidden', 'true');
-    formMessage.style.color = '#d9534f';
+    formMessage.style.color = '#d32f2f';
     formMessage.textContent = '';
   }
 
@@ -471,7 +511,7 @@
     signupForm.setAttribute('aria-hidden', 'false');
     loginForm.style.display = 'none';
     loginForm.setAttribute('aria-hidden', 'true');
-    formMessage.style.color = '#d9534f';
+    formMessage.style.color = '#d32f2f';
     formMessage.textContent = '';
   }
 
@@ -495,11 +535,17 @@
     btnSaveNote.disabled = !editable;
   }
 
+  function highlightMatches(text, query) {
+    if (!query) return text;
+    const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(re, '<span class="note-title-highlight">$1</span>');
+  }
+
   function renderNotesList() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
+    const searchTerm = searchInput.value.trim();
     filteredNotes = notes.filter(note =>
-      note.title.toLowerCase().includes(searchTerm) ||
-      note.content.toLowerCase().includes(searchTerm)
+      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
     notesListEl.innerHTML = '';
     if (filteredNotes.length === 0) {
@@ -514,7 +560,9 @@
     }
     filteredNotes.forEach(note => {
       const li = document.createElement('li');
-      li.textContent = note.title || '(Untitled)';
+      const displayedTitle = note.title || '(Untitled)';
+      li.innerHTML = `<strong>${highlightMatches(displayedTitle, searchTerm)}</strong>
+                      <span class="note-subtitle">${formatDate(note.timestamp)}</span>`;
       li.setAttribute('role', 'option');
       li.id = note.id;
       if (note.id === selectedNoteId) {
@@ -562,7 +610,6 @@
     }
     const title = noteTitleInput.value.trim();
     const content = noteContentInput.value.trim();
-
     if (!title) {
       alert('Note title cannot be empty.');
       return;
@@ -655,7 +702,7 @@
     }
     users[username] = password;
     saveUsers(users);
-    formMessage.style.color = '#3CCF4E';
+    formMessage.style.color = '#388e3c';
     formMessage.textContent = 'Signup successful! You can now login.';
     showLoginForm();
     return true;
@@ -740,7 +787,7 @@
 
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
-    formMessage.style.color = '#d9534f';
+    formMessage.style.color = '#d32f2f';
     const username = loginUsernameInput.value.trim();
     const password = loginPasswordInput.value;
     if (doLogin(username, password)) {
@@ -750,7 +797,7 @@
 
   signupForm.addEventListener('submit', e => {
     e.preventDefault();
-    formMessage.style.color = '#d9534f';
+    formMessage.style.color = '#d32f2f';
     const username = signupUsernameInput.value.trim();
     const password = signupPasswordInput.value;
     const confirmPassword = signupPasswordConfirmInput.value;
@@ -771,8 +818,13 @@
     deleteNote();
   });
 
+  // Debounce search
+  let searchTimeout;
   searchInput.addEventListener('input', () => {
-    renderNotesList();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderNotesList();
+    }, 250);
   });
 
   logoutBtn.addEventListener('click', () => {
@@ -808,3 +860,4 @@
 </script>
 </body>
 </html>
+
