@@ -148,6 +148,7 @@
   #search-container {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #ddd;
+    flex-shrink: 0;
   }
   #search-input {
     width: 100%;
@@ -247,8 +248,8 @@
   }
   #note-actions {
     padding-top: 0.75rem;
+    text-align: right;
     display: flex;
-    justify-content: flex-end;
     gap: 16px;
   }
   .icon-button {
@@ -359,13 +360,11 @@
     <textarea id="note-content" placeholder="Start typing your note here..." aria-label="Note content"></textarea>
     <div id="note-actions">
       <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note">
-        <!-- Improved floppy disk icon -->
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM9 9h6v6H9V9z"></path>
         </svg>
       </button>
       <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d32f2f;">
-        <!-- Improved trash bin icon -->
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"></path>
         </svg>
@@ -376,10 +375,6 @@
 
 <script>
 (() => {
-  const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
-  const API_KEY = 'YOUR_GOOGLE_API_KEY_HERE';
-  const SHEET_NAME = 'Notes';
-
   const loginScreen = document.getElementById('login-screen');
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
@@ -408,39 +403,25 @@
   let noteSaved = false;
   let searchTimeout = null;
 
-  function formatDate(ts) {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
-    } catch {
-      return '';
-    }
-  }
-
   function generateId() {
     return 'id-' + Math.random().toString(36).slice(2);
   }
 
-  function getUserKey(key) {
-    return 'notesapp_' + currentUser + '_' + key;
-  }
-
-  const USERS_KEY = 'notesapp_users';
-
   function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem('notesapp_users', JSON.stringify(users));
   }
 
   function loadUsers() {
+    const raw = localStorage.getItem('notesapp_users');
     try {
-      const raw = localStorage.getItem(USERS_KEY);
       return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
     }
+  }
+
+  function getUserKey(key) {
+    return 'notesapp_' + currentUser + '_' + key;
   }
 
   function saveNotesLocal() {
@@ -448,8 +429,8 @@
   }
 
   function loadNotesLocal() {
+    const raw = localStorage.getItem(getUserKey('notes'));
     try {
-      const raw = localStorage.getItem(getUserKey('notes'));
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
@@ -469,16 +450,6 @@
     localStorage.removeItem('notesapp_user');
   }
 
-  function logout() {
-    clearLogin();
-    currentUser = null;
-    notes = [];
-    filteredNotes = [];
-    selectedNoteId = null;
-    noteSaved = false;
-    renderLogin();
-  }
-
   function renderLogin() {
     loginScreen.style.display = 'flex';
     app.style.display = 'none';
@@ -491,28 +462,20 @@
 
   function showLoginForm() {
     tabLogin.classList.add('active');
-    tabLogin.setAttribute('aria-selected', 'true');
     tabSignup.classList.remove('active');
-    tabSignup.setAttribute('aria-selected', 'false');
     loginForm.style.display = 'block';
-    loginForm.setAttribute('aria-hidden', 'false');
     signupForm.style.display = 'none';
-    signupForm.setAttribute('aria-hidden', 'true');
-    formMessage.style.color = '#d32f2f';
     formMessage.textContent = '';
+    formMessage.style.color = '#d32f2f';
   }
 
   function showSignupForm() {
     tabSignup.classList.add('active');
-    tabSignup.setAttribute('aria-selected', 'true');
     tabLogin.classList.remove('active');
-    tabLogin.setAttribute('aria-selected', 'false');
     signupForm.style.display = 'block';
-    signupForm.setAttribute('aria-hidden', 'false');
     loginForm.style.display = 'none';
-    loginForm.setAttribute('aria-hidden', 'true');
-    formMessage.style.color = '#d32f2f';
     formMessage.textContent = '';
+    formMessage.style.color = '#d32f2f';
   }
 
   function renderApp() {
@@ -535,17 +498,11 @@
     btnSaveNote.disabled = !editable;
   }
 
-  function highlightMatches(text, query) {
-    if (!query) return text;
-    const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(re, '<span class="note-title-highlight">$1</span>');
-  }
-
   function renderNotesList() {
-    const searchTerm = searchInput.value.trim();
+    const searchTerm = searchInput.value.trim().toLowerCase();
     filteredNotes = notes.filter(note =>
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
+      note.title.toLowerCase().includes(searchTerm) ||
+      note.content.toLowerCase().includes(searchTerm)
     );
     notesListEl.innerHTML = '';
     if (filteredNotes.length === 0) {
@@ -560,17 +517,13 @@
     }
     filteredNotes.forEach(note => {
       const li = document.createElement('li');
-      const displayedTitle = note.title || '(Untitled)';
-      li.innerHTML = `<strong>${highlightMatches(displayedTitle, searchTerm)}</strong>
-                      <span class="note-subtitle">${formatDate(note.timestamp)}</span>`;
+      li.textContent = note.title || '(Untitled)';
       li.setAttribute('role', 'option');
       li.id = note.id;
       if (note.id === selectedNoteId) {
         li.classList.add('selected');
       }
-      li.addEventListener('click', () => {
-        selectNote(note.id);
-      });
+      li.addEventListener('click', () => selectNote(note.id));
       notesListEl.appendChild(li);
     });
     if (!selectedNoteId || !filteredNotes.find(n => n.id === selectedNoteId)) {
@@ -603,71 +556,6 @@
     renderNote(note);
   }
 
-  function saveNote() {
-    if (!selectedNoteId) {
-      alert('No note selected to save.');
-      return;
-    }
-    const title = noteTitleInput.value.trim();
-    const content = noteContentInput.value.trim();
-    if (!title) {
-      alert('Note title cannot be empty.');
-      return;
-    }
-    const idx = notes.findIndex(n => n.id === selectedNoteId);
-    if (idx === -1) {
-      const newNote = {
-        id: selectedNoteId,
-        title,
-        content,
-        timestamp: Date.now()
-      };
-      notes.push(newNote);
-    } else {
-      notes[idx].title = title;
-      notes[idx].content = content;
-      notes[idx].timestamp = Date.now();
-    }
-    saveNotesLocal();
-    noteSaved = true;
-    setNoteEditable(false);
-    renderNotesList();
-    syncNotesWithGoogleSheets();
-  }
-
-  function createNewNote() {
-    const newId = generateId();
-    const newNote = {
-      id: newId,
-      title: '',
-      content: '',
-      timestamp: Date.now()
-    };
-    notes.unshift(newNote);
-    selectedNoteId = newId;
-    noteSaved = false;
-    saveNotesLocal();
-    renderNotesList();
-    renderNote(newNote);
-  }
-
-  function deleteNote() {
-    if (!selectedNoteId) {
-      alert('No note selected to delete.');
-      return;
-    }
-    if (!confirm('Are you sure you want to delete this note?')) {
-      return;
-    }
-    notes = notes.filter(n => n.id !== selectedNoteId);
-    saveNotesLocal();
-    selectedNoteId = null;
-    noteSaved = false;
-    renderNotesList();
-    renderNote(null);
-    syncNotesWithGoogleSheets();
-  }
-
   function doLogin(username, password) {
     const users = loadUsers();
     if (!users[username]) {
@@ -682,7 +570,6 @@
     saveLogin(username);
     notes = loadNotesLocal();
     renderApp();
-    syncLoadNotesFromGoogleSheets();
     return true;
   }
 
@@ -708,118 +595,81 @@
     return true;
   }
 
-  const googleSheetsWarning = 'Google Sheets syncing requires valid API key and Sheet ID setup. Writing is not implemented.';
-
-  async function syncLoadNotesFromGoogleSheets() {
-    if (!SHEET_ID || !API_KEY) {
-      console.warn(googleSheetsWarning);
-      return;
-    }
-    try {
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        console.error('Google Sheets API error:', resp.statusText);
-        return;
-      }
-      const data = await resp.json();
-      if (!data.values || data.values.length < 2) {
-        console.log('No data in Google Sheet.');
-        return;
-      }
-      const headers = data.values[0];
-      const rows = data.values.slice(1);
-      const sheetNotes = rows.map(row => {
-        let note = {};
-        headers.forEach((h, i) => {
-          note[h.toLowerCase()] = row[i] || '';
-        });
-        if (note.timestamp) {
-          note.timestamp = Number(note.timestamp);
-        } else {
-          note.timestamp = Date.now();
-        }
-        return note;
-      });
-      let mergedNotes = [];
-      const localMap = new Map(notes.map(n => [n.id, n]));
-      sheetNotes.forEach(sn => {
-        if (localMap.has(sn.id)) {
-          const localNote = localMap.get(sn.id);
-          if (sn.timestamp > localNote.timestamp) {
-            mergedNotes.push(sn);
-          } else {
-            mergedNotes.push(localNote);
-          }
-          localMap.delete(sn.id);
-        } else {
-          mergedNotes.push(sn);
-        }
-      });
-      localMap.forEach(n => mergedNotes.push(n));
-      notes = mergedNotes;
-      saveNotesLocal();
-      renderNotesList();
-    } catch (err) {
-      console.error('Failed to load notes from Google Sheets:', err);
-    }
-  }
-
-  async function syncNotesWithGoogleSheets() {
-    console.log('Sync to Google Sheets requested but not implemented due to OAuth constraints.');
-  }
-
-  tabLogin.addEventListener('click', () => showLoginForm());
-  tabSignup.addEventListener('click', () => showSignupForm());
-
-  tabLogin.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      showLoginForm();
-    }
-  });
-  tabSignup.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      showSignupForm();
-    }
-  });
-
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
-    formMessage.style.color = '#d32f2f';
     const username = loginUsernameInput.value.trim();
     const password = loginPasswordInput.value;
-    if (doLogin(username, password)) {
-      formMessage.textContent = '';
-    }
+    doLogin(username, password);
   });
 
   signupForm.addEventListener('submit', e => {
     e.preventDefault();
-    formMessage.style.color = '#d32f2f';
     const username = signupUsernameInput.value.trim();
     const password = signupPasswordInput.value;
     const confirmPassword = signupPasswordConfirmInput.value;
-    if (doSignup(username, password, confirmPassword)) {
-      signupForm.reset();
-    }
+    doSignup(username, password, confirmPassword);
   });
 
+  tabLogin.addEventListener('click', showLoginForm);
+  tabSignup.addEventListener('click', showSignupForm);
+
   btnNewNote.addEventListener('click', () => {
-    createNewNote();
+    const newId = generateId();
+    const newNote = {
+      id: newId,
+      title: '',
+      content: '',
+      timestamp: Date.now()
+    };
+    notes.unshift(newNote);
+    selectedNoteId = newId;
+    noteSaved = false;
+    saveNotesLocal();
+    renderNotesList();
+    renderNote(newNote);
   });
 
   btnSaveNote.addEventListener('click', () => {
-    saveNote();
+    if (!selectedNoteId) {
+      alert('No note selected to save.');
+      return;
+    }
+    const title = noteTitleInput.value.trim();
+    const content = noteContentInput.value.trim();
+    if (!title) {
+      alert('Note title cannot be empty.');
+      return;
+    }
+    const idx = notes.findIndex(n => n.id === selectedNoteId);
+    if (idx === -1) {
+      notes.push({
+        id: selectedNoteId,
+        title,
+        content,
+        timestamp: Date.now()
+      });
+    } else {
+      notes[idx].title = title;
+      notes[idx].content = content;
+      notes[idx].timestamp = Date.now();
+    }
+    saveNotesLocal();
+    noteSaved = true;
+    setNoteEditable(false);
+    renderNotesList();
   });
 
   btnDeleteNote.addEventListener('click', () => {
-    deleteNote();
+    if (!selectedNoteId) return;
+    if (!confirm('Are you sure you want to delete this note?')) return;
+    notes = notes.filter(n => n.id !== selectedNoteId);
+    saveNotesLocal();
+    selectedNoteId = null;
+    noteSaved = false;
+    renderNotesList();
+    renderNote(null);
   });
 
-  // Debounce search
-  let searchTimeout;
   searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -828,17 +678,34 @@
   });
 
   logoutBtn.addEventListener('click', () => {
-    logout();
+    clearLogin();
+    currentUser = null;
+    notes = [];
+    filteredNotes = [];
+    selectedNoteId = null;
+    noteSaved = false;
+    renderLogin();
   });
 
-  window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-      e.preventDefault();
-      if (app.style.display === 'flex' && !btnSaveNote.disabled) {
-        saveNote();
-      }
-    }
-  });
+  function renderApp() {
+    loginScreen.style.display = 'none';
+    app.style.display = 'flex';
+    clearNoteFields();
+    renderNotesList();
+  }
+
+  function clearNoteFields() {
+    noteTitleInput.value = '';
+    noteContentInput.value = '';
+    setNoteEditable(true);
+  }
+
+  function setNoteEditable(editable) {
+    noteTitleInput.readOnly = !editable;
+    noteContentInput.readOnly = !editable;
+    noteSaved = !editable;
+    btnSaveNote.disabled = !editable;
+  }
 
   function initialize() {
     const loginData = loadLogin();
@@ -848,7 +715,6 @@
         currentUser = loginData.user;
         notes = loadNotesLocal();
         renderApp();
-        syncLoadNotesFromGoogleSheets();
         return;
       }
     }
