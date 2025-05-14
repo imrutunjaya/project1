@@ -20,9 +20,9 @@
   #app {
     display: flex;
     flex: 1;
-    min-height: 0; /* for flex to work */
+    min-height: 0;
   }
-  /* Login/signup screen - white background, distraction free */
+  /* Login/signup screen - white background with elegant styling */
   #login-screen {
     display: flex;
     flex-direction: column;
@@ -37,27 +37,27 @@
     font-weight: 700;
     letter-spacing: 0.05em;
   }
-
   /* Tab buttons container */
   #form-tabs {
     display: flex;
     margin-bottom: 1.5rem;
     gap: 1rem;
   }
-  /* Tab buttons distinct, minimal style */
+  /* Tab buttons distinct */
   .tab-button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     background: #eee;
-    color: #444;
+    color: #555;
     border-radius: 10px;
     padding: 0.7rem 1.5rem;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
+    box-shadow: 0 0 4px transparent;
     user-select: none;
-    transition: background 0.3s ease, color 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     border: 2px solid transparent;
   }
   .tab-button svg {
@@ -70,11 +70,11 @@
     color: #222;
   }
   .tab-button.active {
-    background: #cfd7ef;
-    color: #111;
-    border-color: #a7b4da;
+    background: #667eea;
+    color: #fff;
+    box-shadow: 0 5px 18px rgba(102, 126, 234, 0.4);
+    border-color: #4b54d4;
   }
-
   /* Forms */
   form {
     display: flex;
@@ -83,14 +83,29 @@
     background: #fafafa;
     padding: 2rem 2.5rem 2.5rem;
     border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.12);
   }
-
-  /* Show login/signup form buttons as normal */
+  form input[type="text"],
+  form input[type="password"] {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #fff;
+    color: #111;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  form input[type="text"]:focus,
+  form input[type="password"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 8px #99aaff;
+  }
   form button {
-    display: block;
     background: #667eea;
-    color: white;
+    color: #fff;
     font-weight: 700;
     padding: 0.85rem 1.2rem;
     border: none;
@@ -101,14 +116,11 @@
     user-select: none;
     box-shadow: 0 5px 10px rgba(102,126,234,0.5);
     transition: background 0.3s ease, box-shadow 0.4s ease;
-    margin-top: 10px;
   }
-
   form button:hover {
     background: #4b54d4;
     box-shadow: 0 8px 18px rgba(75,84,212,0.8);
   }
-
   #form-message {
     margin-top: 1rem;
     font-size: 0.95rem;
@@ -118,8 +130,7 @@
     user-select: none;
     font-weight: 600;
   }
-
-  /* Layout unchanged */
+  /* Layout */
   #sidebar {
     width: 280px;
     background: #282c34;
@@ -221,7 +232,7 @@
     display: flex;
     gap: 16px;
   }
-  /* Icon buttons instead of text buttons */
+  /* Icon buttons */
   .icon-button {
     background: none;
     border: none;
@@ -338,12 +349,10 @@
 
 <script>
 (() => {
-  // CONFIGURATION for Google Sheets synchronization
-  const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE'; // Put your sheet ID here
-  const API_KEY = 'YOUR_GOOGLE_API_KEY_HERE'; // Put your Google API key here
+  const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
+  const API_KEY = 'YOUR_GOOGLE_API_KEY_HERE';
   const SHEET_NAME = 'Notes';
 
-  // Elements
   const loginScreen = document.getElementById('login-screen');
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
@@ -365,76 +374,61 @@
   const searchInput = document.getElementById('search-input');
   const logoutBtn = document.getElementById('logout-btn');
 
-  // State
   let currentUser = null;
   let notes = [];
   let filteredNotes = [];
   let selectedNoteId = null;
   let noteSaved = false;
 
-  // Utils
   function generateId() {
-    return 'id-' + Math.random().toString(36).substr(2, 16);
+    return 'id-' + Math.random().toString(36).slice(2);
   }
 
-  // LocalStorage keys prefix per user
   function getUserKey(key) {
     return 'notesapp_' + currentUser + '_' + key;
   }
 
-  // Store all registered users in localStorage under this key
   const USERS_KEY = 'notesapp_users';
 
-  // Save users object { username: password, ...}
   function saveUsers(users) {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
   }
 
-  // Load users object
   function loadUsers() {
-    const raw = localStorage.getItem(USERS_KEY);
-    if (!raw) return {};
     try {
-      return JSON.parse(raw);
+      const raw = localStorage.getItem(USERS_KEY);
+      return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
     }
   }
 
-  // Save notes to localStorage for current user
   function saveNotesLocal() {
     localStorage.setItem(getUserKey('notes'), JSON.stringify(notes));
   }
 
-  // Load notes from localStorage for current user
   function loadNotesLocal() {
-    const raw = localStorage.getItem(getUserKey('notes'));
-    if (!raw) return [];
     try {
-      return JSON.parse(raw);
+      const raw = localStorage.getItem(getUserKey('notes'));
+      return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
     }
   }
 
-  // Save login info locally for auto-login on reload
   function saveLogin(user) {
     localStorage.setItem('notesapp_user', user);
   }
 
-  // Load login info for auto-login
   function loadLogin() {
     const user = localStorage.getItem('notesapp_user');
-    if (user) return { user };
-    return null;
+    return user ? { user } : null;
   }
 
-  // Clear login info on logout
   function clearLogin() {
     localStorage.removeItem('notesapp_user');
   }
 
-  // Logout
   function logout() {
     clearLogin();
     currentUser = null;
@@ -445,7 +439,6 @@
     renderLogin();
   }
 
-  // Render login/signup screen (default to login tab)
   function renderLogin() {
     loginScreen.style.display = 'flex';
     app.style.display = 'none';
@@ -482,7 +475,6 @@
     formMessage.textContent = '';
   }
 
-  // Render app
   function renderApp() {
     loginScreen.style.display = 'none';
     app.style.display = 'flex';
@@ -496,7 +488,6 @@
     setNoteEditable(true);
   }
 
-  // Set whether note inputs are editable or read-only
   function setNoteEditable(editable) {
     noteTitleInput.readOnly = !editable;
     noteContentInput.readOnly = !editable;
@@ -504,7 +495,6 @@
     btnSaveNote.disabled = !editable;
   }
 
-  // Render notes list
   function renderNotesList() {
     const searchTerm = searchInput.value.trim().toLowerCase();
     filteredNotes = notes.filter(note =>
@@ -540,7 +530,6 @@
     }
   }
 
-  // Render note in editor
   function renderNote(note) {
     if (!note) {
       clearNoteFields();
@@ -558,17 +547,14 @@
     }
   }
 
-  // Select note by id
   function selectNote(id) {
     selectedNoteId = id;
-    // When switching, reset saved flag allowing edits for existing notes
     noteSaved = false;
     renderNotesList();
     const note = notes.find(n => n.id === id);
     renderNote(note);
   }
 
-  // Add or update note
   function saveNote() {
     if (!selectedNoteId) {
       alert('No note selected to save.');
@@ -602,7 +588,6 @@
     syncNotesWithGoogleSheets();
   }
 
-  // Create new note
   function createNewNote() {
     const newId = generateId();
     const newNote = {
@@ -619,7 +604,6 @@
     renderNote(newNote);
   }
 
-  // Delete note
   function deleteNote() {
     if (!selectedNoteId) {
       alert('No note selected to delete.');
@@ -637,7 +621,6 @@
     syncNotesWithGoogleSheets();
   }
 
-  // Handle login
   function doLogin(username, password) {
     const users = loadUsers();
     if (!users[username]) {
@@ -656,7 +639,6 @@
     return true;
   }
 
-  // Handle signup
   function doSignup(username, password, confirmPassword) {
     if (!username || !password || !confirmPassword) {
       formMessage.textContent = 'Please fill in all fields.';
@@ -671,16 +653,14 @@
       formMessage.textContent = 'Username already taken. Please choose another.';
       return false;
     }
-    // Save user
     users[username] = password;
     saveUsers(users);
-    formMessage.style.color = '#3CCF4E'; // Success green
+    formMessage.style.color = '#3CCF4E';
     formMessage.textContent = 'Signup successful! You can now login.';
     showLoginForm();
     return true;
   }
 
-  // -------------- Google Sheets Sync Logic ------------------
   const googleSheetsWarning = 'Google Sheets syncing requires valid API key and Sheet ID setup. Writing is not implemented.';
 
   async function syncLoadNotesFromGoogleSheets() {
@@ -742,13 +722,9 @@
     console.log('Sync to Google Sheets requested but not implemented due to OAuth constraints.');
   }
 
-  // -------------- Event Listeners ------------------
-
-  // Tabs toggle on button clicks
   tabLogin.addEventListener('click', () => showLoginForm());
   tabSignup.addEventListener('click', () => showSignupForm());
 
-  // Accessibility keyboard toggle tabs
   tabLogin.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -762,10 +738,9 @@
     }
   });
 
-  // Login form submit
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
-    formMessage.style.color = '#d9534f'; // Reset to error red
+    formMessage.style.color = '#d9534f';
     const username = loginUsernameInput.value.trim();
     const password = loginPasswordInput.value;
     if (doLogin(username, password)) {
@@ -773,7 +748,6 @@
     }
   });
 
-  // Signup form submit
   signupForm.addEventListener('submit', e => {
     e.preventDefault();
     formMessage.style.color = '#d9534f';
@@ -814,7 +788,6 @@
     }
   });
 
-  // On startup
   function initialize() {
     const loginData = loadLogin();
     if (loginData) {
@@ -835,4 +808,3 @@
 </script>
 </body>
 </html>
-
