@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notes App with Signup, Login and Google Sheets Sync</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #111;
+    display: flex;
+    flex-direction: column;
+  }
+  #app {
+    display: flex;
+    flex: 1;
+    min-height: 0; /* for flex to work */
+  }
+  /* Login/signup screen - white background, distraction free */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #fff;
+    color: #111;
+  }
+  #login-screen h2 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* Tab buttons container */
+  #form-tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+  /* Tab buttons distinct, minimal style */
+  .tab-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eee;
+    color: #444;
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s ease, color 0.3s ease;
+    border: 2px solid transparent;
+  }
+  .tab-button svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+  .tab-button:hover {
+    background: #ddd;
+    color: #222;
+  }
+  .tab-button.active {
+    background: #cfd7ef;
+    color: #111;
+    border-color: #a7b4da;
+  }
+
+  /* Forms */
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    background: #fafafa;
+    padding: 2rem 2.5rem 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  }
+
+  /* Show login/signup form buttons as normal */
+  form button {
+    display: block;
+    background: #667eea;
+    color: white;
+    font-weight: 700;
+    padding: 0.85rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    user-select: none;
+    box-shadow: 0 5px 10px rgba(102,126,234,0.5);
+    transition: background 0.3s ease, box-shadow 0.4s ease;
+    margin-top: 10px;
+  }
+
+  form button:hover {
+    background: #4b54d4;
+    box-shadow: 0 8px 18px rgba(75,84,212,0.8);
+  }
+
+  #form-message {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    min-height: 1.4em;
+    text-align: center;
+    color: #d9534f;
+    user-select: none;
+    font-weight: 600;
+  }
+
+  /* Layout unchanged */
+  #sidebar {
+    width: 280px;
+    background: #282c34;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar header {
+    padding: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: #20232a;
+    text-align: center;
+    user-select: none;
+  }
+  #search-container {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #444;
+  }
+  #search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+  }
+  #notes-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  #notes-list li {
+    cursor: pointer;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+  }
+  #notes-list li.selected {
+    background: #4c5c9f;
+  }
+  #notes-list li:hover {
+    background: #3d4a82;
+  }
+  #btn-new-note {
+    background: #4c5c9f;
+    border: none;
+    width: 100%;
+    padding: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    color: white;
+    transition: background 0.3s ease;
+  }
+  #btn-new-note:hover {
+    background: #6878d1;
+  }
+  #main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 1rem 1.5rem;
+    min-width: 0;
+  }
+  #note-title {
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.3rem;
+    outline: none;
+    width: 100%;
+    background: transparent;
+    color: #111;
+    resize: none;
+  }
+  #note-content {
+    flex-grow: 1;
+    font-size: 1rem;
+    border: none;
+    outline: none;
+    resize: none;
+    width: 100%;
+    line-height: 1.5;
+    font-family: inherit;
+    background: transparent;
+    color: #111;
+  }
+  #note-actions {
+    padding-top: 0.75rem;
+    text-align: right;
+    display: flex;
+    gap: 16px;
+  }
+  /* Icon buttons instead of text buttons */
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-button:hover:not(:disabled) {
+    background-color: #d0d5ff;
+  }
+  .icon-button:disabled {
+    color: #aaa;
+    cursor: default;
+  }
+  .icon-button svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+  #logout-btn {
+    background: #a83232;
+    font-weight: 700;
+    margin-top: auto;
+    border-radius: 0;
+  }
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #282c34;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #777;
+  }
+  /* Responsive */
+  @media (max-width: 768px) {
+    #sidebar {
+      width: 200px;
+    }
+    #login-screen form {
+      width: 90vw;
+      max-width: 320px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <h2 id="form-header">Login to Notes</h2>
+  <div id="form-tabs">
+    <button type="button" class="tab-button active" id="tab-login" role="tab" aria-selected="true" aria-controls="login-form" tabindex="0" aria-label="Login tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zM12 14c-3.31 0-6 2.69-6 6v2h12v-2c0-3.31-2.69-6-6-6z"></path></svg>
+      Login
+    </button>
+    <button type="button" class="tab-button" id="tab-signup" role="tab" aria-selected="false" aria-controls="signup-form" tabindex="0" aria-label="Sign up tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 11h8v2h-8v8h-2v-8H3v-2h8V3h2v8z"></path></svg>
+      Sign Up
+    </button>
+  </div>
+  <form id="login-form" style="display: block;" aria-labelledby="tab-login" autocomplete="off" novalidate>
+    <input type="text" id="login-username" placeholder="Username" autocomplete="username" required aria-required="true" />
+    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required aria-required="true" />
+    <button type="submit">Login</button>
+  </form>
+
+  <form id="signup-form" style="display: none;" aria-labelledby="tab-signup" autocomplete="off" novalidate>
+    <input type="text" id="signup-username" placeholder="Username" autocomplete="username" required aria-required="true" />
+    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" required aria-required="true" />
+    <input type="password" id="signup-password-confirm" placeholder="Confirm Password" autocomplete="new-password" required aria-required="true" />
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <div id="form-message" role="alert" aria-live="assertive"></div>
+</div>
+
+<div id="app" style="display:none;">
+  <aside id="sidebar">
+    <header>My Notes</header>
+    <div id="search-container">
+      <input type="search" id="search-input" placeholder="Search notes..." autocomplete="off" aria-label="Search notes" />
+    </div>
+    <ul id="notes-list" role="listbox" tabindex="0" aria-label="List of notes"></ul>
+    <button id="btn-new-note" aria-label="Create new note">+ New Note</button>
+    <button id="logout-btn" aria-label="Logout">Logout</button>
+  </aside>
+  <main id="main-content" aria-live="polite">
+    <input id="note-title" type="text" placeholder="Note Title" aria-label="Note title" />
+    <textarea id="note-content" placeholder="Start typing your note here..." aria-label="Note content"></textarea>
+    <div id="note-actions">
+      <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM12 12a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"></path>
+        </svg>
+      </button>
+      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d9534f;">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"></path>
+        </svg>
+      </button>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  // CONFIGURATION for Google Sheets synchronization
+  const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE'; // Put your sheet ID here
+  const API_KEY = 'YOUR_GOOGLE_API_KEY_HERE'; // Put your Google API key here
+  const SHEET_NAME = 'Notes';
+
+  // Elements
+  const loginScreen = document.getElementById('login-screen');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const formMessage = document.getElementById('form-message');
+  const tabLogin = document.getElementById('tab-login');
+  const tabSignup = document.getElementById('tab-signup');
+  const loginUsernameInput = document.getElementById('login-username');
+  const loginPasswordInput = document.getElementById('login-password');
+  const signupUsernameInput = document.getElementById('signup-username');
+  const signupPasswordInput = document.getElementById('signup-password');
+  const signupPasswordConfirmInput = document.getElementById('signup-password-confirm');
+  const app = document.getElementById('app');
+  const notesListEl = document.getElementById('notes-list');
+  const noteTitleInput = document.getElementById('note-title');
+  const noteContentInput = document.getElementById('note-content');
+  const btnNewNote = document.getElementById('btn-new-note');
+  const btnSaveNote = document.getElementById('btn-save-note');
+  const btnDeleteNote = document.getElementById('btn-delete-note');
+  const searchInput = document.getElementById('search-input');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  // State
+  let currentUser = null;
+  let notes = [];
+  let filteredNotes = [];
+  let selectedNoteId = null;
+  let noteSaved = false;
+
+  // Utils
+  function generateId() {
+    return 'id-' + Math.random().toString(36).substr(2, 16);
+  }
+
+  // LocalStorage keys prefix per user
+  function getUserKey(key) {
+    return 'notesapp_' + currentUser + '_' + key;
+  }
+
+  // Store all registered users in localStorage under this key
+  const USERS_KEY = 'notesapp_users';
+
+  // Save users object { username: password, ...}
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  // Load users object
+  function loadUsers() {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+
+  // Save notes to localStorage for current user
+  function saveNotesLocal() {
+    localStorage.setItem(getUserKey('notes'), JSON.stringify(notes));
+  }
+
+  // Load notes from localStorage for current user
+  function loadNotesLocal() {
+    const raw = localStorage.getItem(getUserKey('notes'));
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+
+  // Save login info locally for auto-login on reload
+  function saveLogin(user) {
+    localStorage.setItem('notesapp_user', user);
+  }
+
+  // Load login info for auto-login
+  function loadLogin() {
+    const user = localStorage.getItem('notesapp_user');
+    if (user) return { user };
+    return null;
+  }
+
+  // Clear login info on logout
+  function clearLogin() {
+    localStorage.removeItem('notesapp_user');
+  }
+
+  // Logout
+  function logout() {
+    clearLogin();
+    currentUser = null;
+    notes = [];
+    filteredNotes = [];
+    selectedNoteId = null;
+    noteSaved = false;
+    renderLogin();
+  }
+
+  // Render login/signup screen (default to login tab)
+  function renderLogin() {
+    loginScreen.style.display = 'flex';
+    app.style.display = 'none';
+    loginForm.reset();
+    signupForm.reset();
+    showLoginForm();
+    currentUser = null;
+    formMessage.textContent = '';
+  }
+
+  function showLoginForm() {
+    tabLogin.classList.add('active');
+    tabLogin.setAttribute('aria-selected', 'true');
+    tabSignup.classList.remove('active');
+    tabSignup.setAttribute('aria-selected', 'false');
+    loginForm.style.display = 'block';
+    loginForm.setAttribute('aria-hidden', 'false');
+    signupForm.style.display = 'none';
+    signupForm.setAttribute('aria-hidden', 'true');
+    formMessage.style.color = '#d9534f';
+    formMessage.textContent = '';
+  }
+
+  function showSignupForm() {
+    tabSignup.classList.add('active');
+    tabSignup.setAttribute('aria-selected', 'true');
+    tabLogin.classList.remove('active');
+    tabLogin.setAttribute('aria-selected', 'false');
+    signupForm.style.display = 'block';
+    signupForm.setAttribute('aria-hidden', 'false');
+    loginForm.style.display = 'none';
+    loginForm.setAttribute('aria-hidden', 'true');
+    formMessage.style.color = '#d9534f';
+    formMessage.textContent = '';
+  }
+
+  // Render app
+  function renderApp() {
+    loginScreen.style.display = 'none';
+    app.style.display = 'flex';
+    clearNoteFields();
+    renderNotesList();
+  }
+
+  function clearNoteFields() {
+    noteTitleInput.value = '';
+    noteContentInput.value = '';
+    setNoteEditable(true);
+  }
+
+  // Set whether note inputs are editable or read-only
+  function setNoteEditable(editable) {
+    noteTitleInput.readOnly = !editable;
+    noteContentInput.readOnly = !editable;
+    noteSaved = !editable;
+    btnSaveNote.disabled = !editable;
+  }
+
+  // Render notes list
+  function renderNotesList() {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    filteredNotes = notes.filter(note =>
+      note.title.toLowerCase().includes(searchTerm) ||
+      note.content.toLowerCase().includes(searchTerm)
+    );
+    notesListEl.innerHTML = '';
+    if (filteredNotes.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = '(No notes found)';
+      li.style.userSelect = 'none';
+      li.style.cursor = 'default';
+      notesListEl.appendChild(li);
+      selectedNoteId = null;
+      renderNote(null);
+      return;
+    }
+    filteredNotes.forEach(note => {
+      const li = document.createElement('li');
+      li.textContent = note.title || '(Untitled)';
+      li.setAttribute('role', 'option');
+      li.id = note.id;
+      if (note.id === selectedNoteId) {
+        li.classList.add('selected');
+      }
+      li.addEventListener('click', () => {
+        selectNote(note.id);
+      });
+      notesListEl.appendChild(li);
+    });
+    if (!selectedNoteId || !filteredNotes.find(n => n.id === selectedNoteId)) {
+      selectNote(filteredNotes[0].id);
+    }
+  }
+
+  // Render note in editor
+  function renderNote(note) {
+    if (!note) {
+      clearNoteFields();
+      btnDeleteNote.disabled = true;
+      setNoteEditable(false);
+    } else {
+      noteTitleInput.value = note.title;
+      noteContentInput.value = note.content;
+      btnDeleteNote.disabled = false;
+      if (noteSaved) {
+        setNoteEditable(false);
+      } else {
+        setNoteEditable(true);
+      }
+    }
+  }
+
+  // Select note by id
+  function selectNote(id) {
+    selectedNoteId = id;
+    // When switching, reset saved flag allowing edits for existing notes
+    noteSaved = false;
+    renderNotesList();
+    const note = notes.find(n => n.id === id);
+    renderNote(note);
+  }
+
+  // Add or update note
+  function saveNote() {
+    if (!selectedNoteId) {
+      alert('No note selected to save.');
+      return;
+    }
+    const title = noteTitleInput.value.trim();
+    const content = noteContentInput.value.trim();
+
+    if (!title) {
+      alert('Note title cannot be empty.');
+      return;
+    }
+    const idx = notes.findIndex(n => n.id === selectedNoteId);
+    if (idx === -1) {
+      const newNote = {
+        id: selectedNoteId,
+        title,
+        content,
+        timestamp: Date.now()
+      };
+      notes.push(newNote);
+    } else {
+      notes[idx].title = title;
+      notes[idx].content = content;
+      notes[idx].timestamp = Date.now();
+    }
+    saveNotesLocal();
+    noteSaved = true;
+    setNoteEditable(false);
+    renderNotesList();
+    syncNotesWithGoogleSheets();
+  }
+
+  // Create new note
+  function createNewNote() {
+    const newId = generateId();
+    const newNote = {
+      id: newId,
+      title: '',
+      content: '',
+      timestamp: Date.now()
+    };
+    notes.unshift(newNote);
+    selectedNoteId = newId;
+    noteSaved = false;
+    saveNotesLocal();
+    renderNotesList();
+    renderNote(newNote);
+  }
+
+  // Delete note
+  function deleteNote() {
+    if (!selectedNoteId) {
+      alert('No note selected to delete.');
+      return;
+    }
+    if (!confirm('Are you sure you want to delete this note?')) {
+      return;
+    }
+    notes = notes.filter(n => n.id !== selectedNoteId);
+    saveNotesLocal();
+    selectedNoteId = null;
+    noteSaved = false;
+    renderNotesList();
+    renderNote(null);
+    syncNotesWithGoogleSheets();
+  }
+
+  // Handle login
+  function doLogin(username, password) {
+    const users = loadUsers();
+    if (!users[username]) {
+      formMessage.textContent = 'User does not exist. Please sign up.';
+      return false;
+    }
+    if (users[username] !== password) {
+      formMessage.textContent = 'Incorrect password.';
+      return false;
+    }
+    currentUser = username;
+    saveLogin(username);
+    notes = loadNotesLocal();
+    renderApp();
+    syncLoadNotesFromGoogleSheets();
+    return true;
+  }
+
+  // Handle signup
+  function doSignup(username, password, confirmPassword) {
+    if (!username || !password || !confirmPassword) {
+      formMessage.textContent = 'Please fill in all fields.';
+      return false;
+    }
+    if (password !== confirmPassword) {
+      formMessage.textContent = 'Passwords do not match.';
+      return false;
+    }
+    const users = loadUsers();
+    if (users[username]) {
+      formMessage.textContent = 'Username already taken. Please choose another.';
+      return false;
+    }
+    // Save user
+    users[username] = password;
+    saveUsers(users);
+    formMessage.style.color = '#3CCF4E'; // Success green
+    formMessage.textContent = 'Signup successful! You can now login.';
+    showLoginForm();
+    return true;
+  }
+
+  // -------------- Google Sheets Sync Logic ------------------
+  const googleSheetsWarning = 'Google Sheets syncing requires valid API key and Sheet ID setup. Writing is not implemented.';
+
+  async function syncLoadNotesFromGoogleSheets() {
+    if (!SHEET_ID || !API_KEY) {
+      console.warn(googleSheetsWarning);
+      return;
+    }
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        console.error('Google Sheets API error:', resp.statusText);
+        return;
+      }
+      const data = await resp.json();
+      if (!data.values || data.values.length < 2) {
+        console.log('No data in Google Sheet.');
+        return;
+      }
+      const headers = data.values[0];
+      const rows = data.values.slice(1);
+      const sheetNotes = rows.map(row => {
+        let note = {};
+        headers.forEach((h, i) => {
+          note[h.toLowerCase()] = row[i] || '';
+        });
+        if (note.timestamp) {
+          note.timestamp = Number(note.timestamp);
+        } else {
+          note.timestamp = Date.now();
+        }
+        return note;
+      });
+      let mergedNotes = [];
+      const localMap = new Map(notes.map(n => [n.id, n]));
+      sheetNotes.forEach(sn => {
+        if (localMap.has(sn.id)) {
+          const localNote = localMap.get(sn.id);
+          if (sn.timestamp > localNote.timestamp) {
+            mergedNotes.push(sn);
+          } else {
+            mergedNotes.push(localNote);
+          }
+          localMap.delete(sn.id);
+        } else {
+          mergedNotes.push(sn);
+        }
+      });
+      localMap.forEach(n => mergedNotes.push(n));
+      notes = mergedNotes;
+      saveNotesLocal();
+      renderNotesList();
+    } catch (err) {
+      console.error('Failed to load notes from Google Sheets:', err);
+    }
+  }
+
+  async function syncNotesWithGoogleSheets() {
+    console.log('Sync to Google Sheets requested but not implemented due to OAuth constraints.');
+  }
+
+  // -------------- Event Listeners ------------------
+
+  // Tabs toggle on button clicks
+  tabLogin.addEventListener('click', () => showLoginForm());
+  tabSignup.addEventListener('click', () => showSignupForm());
+
+  // Accessibility keyboard toggle tabs
+  tabLogin.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      showLoginForm();
+    }
+  });
+  tabSignup.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      showSignupForm();
+    }
+  });
+
+  // Login form submit
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    formMessage.style.color = '#d9534f'; // Reset to error red
+    const username = loginUsernameInput.value.trim();
+    const password = loginPasswordInput.value;
+    if (doLogin(username, password)) {
+      formMessage.textContent = '';
+    }
+  });
+
+  // Signup form submit
+  signupForm.addEventListener('submit', e => {
+    e.preventDefault();
+    formMessage.style.color = '#d9534f';
+    const username = signupUsernameInput.value.trim();
+    const password = signupPasswordInput.value;
+    const confirmPassword = signupPasswordConfirmInput.value;
+    if (doSignup(username, password, confirmPassword)) {
+      signupForm.reset();
+    }
+  });
+
+  btnNewNote.addEventListener('click', () => {
+    createNewNote();
+  });
+
+  btnSaveNote.addEventListener('click', () => {
+    saveNote();
+  });
+
+  btnDeleteNote.addEventListener('click', () => {
+    deleteNote();
+  });
+
+  searchInput.addEventListener('input', () => {
+    renderNotesList();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    logout();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      if (app.style.display === 'flex' && !btnSaveNote.disabled) {
+        saveNote();
+      }
+    }
+  });
+
+  // On startup
+  function initialize() {
+    const loginData = loadLogin();
+    if (loginData) {
+      const users = loadUsers();
+      if (users[loginData.user]) {
+        currentUser = loginData.user;
+        notes = loadNotesLocal();
+        renderApp();
+        syncLoadNotesFromGoogleSheets();
+        return;
+      }
+    }
+    renderLogin();
+  }
+
+  initialize();
+})();
+</script>
+</body>
+</html>
+
