@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Sidebar Enhanced with Categories</title>
+<title>Notes App - Sidebar with Icon Logout</title>
 <style>
   /* Reset and base */
   * {
@@ -163,7 +163,7 @@
     box-shadow: 0 0 10px 3px #888;
     background: #fff;
   }
-  /* Category bar - hidden by default */
+  /* Category bar */
   #category-bar {
     display: none;
     padding: 0.5rem 1rem;
@@ -261,21 +261,23 @@
     justify-content: space-between;
     flex-shrink: 0;
   }
-  /* Logout button smaller height */
+  /* Logout button - icon only */
   #logout-btn {
     background: #222;
     font-weight: 700;
-    /* reduced padding & height */
-    padding: 0.55rem 1rem;
+    padding: 0.45rem;
     height: 36px;
+    width: 36px;
     border-radius: 8px;
     color: #fff;
     border: none;
     cursor: pointer;
     letter-spacing: 0.05em;
     transition: background 0.3s ease, box-shadow 0.3s ease;
-    font-size: 1rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #logout-btn:hover {
     background: #444;
@@ -337,7 +339,7 @@
     height: 20px;
     fill: currentColor;
   }
-  /* Text size controls container */
+  /* Text size controls container and buttons */
   #text-size-control {
     padding: 0.7rem 1rem;
     border-top: 1px solid #222;
@@ -374,7 +376,6 @@
     border-bottom-left-radius: 20px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.2);
   }
-  /* Reduced title font size and margins */
   #note-title {
     border: none;
     font-size: 1.3rem;
@@ -574,7 +575,11 @@
           <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
-      <button id="logout-btn" aria-label="Logout">Logout</button>
+      <button id="logout-btn" aria-label="Logout" title="Logout">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:24px; height:24px; fill: currentColor;">
+          <path d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-9v2h9v14h-9v2h9a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
+        </svg>
+      </button>
     </div>
     <div id="text-size-control" aria-label="Text size controls" role="group">
       <button id="txt-size-small" aria-pressed="false" title="Small text size">Small</button>
@@ -612,7 +617,6 @@
 
 <script>
 (() => {
-  // Elements declared
   const loginScreen = document.getElementById('login-screen');
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
@@ -636,7 +640,6 @@
   const searchInput = document.getElementById('search-input');
   const logoutBtn = document.getElementById('logout-btn');
   const mainContent = document.getElementById('main-content');
-  const textSizeControl = document.getElementById('text-size-control');
   const txtSmallBtn = document.getElementById('txt-size-small');
   const txtNormalBtn = document.getElementById('txt-size-normal');
   const txtLargeBtn = document.getElementById('txt-size-large');
@@ -662,7 +665,7 @@
       titleSize = '2.4rem';
       contentSize = '1.4rem';
     } else {
-      titleSize = '1.3rem'; // reduced smaller base to better fit
+      titleSize = '1.3rem';
       contentSize = '1.15rem';
       size = 'normal';
     }
@@ -779,7 +782,7 @@
     noteContentInput.readOnly = !editable;
     noteSaved = !editable;
     btnSaveNote.disabled = !editable;
-    btnEditNote.disabled = editable; // disable edit button during editing
+    btnEditNote.disabled = editable;
   }
 
   function renderNotesList() {
@@ -980,7 +983,6 @@
     renderLogin();
   });
 
-  // Fullscreen toggle functionality
   btnFullscreen.addEventListener('click', () => {
     if (window.innerWidth <= 768 && !isFullscreen) {
       alert("Fullscreen mode provides best experience on desktop screens.");
@@ -1001,12 +1003,10 @@
     }
   });
 
-  // Text size buttons
   txtSmallBtn.addEventListener('click', () => setTextSize('small'));
   txtNormalBtn.addEventListener('click', () => setTextSize('normal'));
   txtLargeBtn.addEventListener('click', () => setTextSize('large'));
 
-  // Category bar toggle and dictionary button
   btnCategoryToggle.addEventListener('click', () => {
     const isActive = categoryBar.classList.toggle('active');
     btnCategoryToggle.classList.toggle('rotated', isActive);
@@ -1017,7 +1017,6 @@
     alert("Dictionary feature not implemented yet.");
   });
 
-  // Initialize
   function initialize() {
     const loginData = loadLogin();
     if (loginData) {
