@@ -12,8 +12,8 @@
   body, html {
     margin: 0; padding: 0; height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #fff;
-    color: #111;
+    background: #f4f6fb;
+    color: #222;
     display: flex;
     flex-direction: column;
   }
@@ -21,8 +21,9 @@
     display: flex;
     flex: 1;
     min-height: 0;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
   }
-  /* Login/signup screen */
+  /* Login/signup screen - unchanged as requested */
   #login-screen {
     display: flex;
     flex-direction: column;
@@ -37,7 +38,7 @@
     font-weight: 700;
     letter-spacing: 0.05em;
   }
-  /* Tab buttons container */
+  /* Tab buttons container - unchanged */
   #form-tabs {
     display: flex;
     margin-bottom: 1.5rem;
@@ -56,7 +57,7 @@
     cursor: pointer;
     box-shadow: none;
     user-select: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.3s ease, color 0.3s ease;
     border: 2px solid transparent;
   }
   .tab-button svg {
@@ -72,9 +73,9 @@
     background: #3f51b5;
     color: #fff;
     border-color: #2c3a9a;
-    box-shadow: none;
+    box-shadow: 0 0 12px rgba(63,81,181,0.6);
   }
-  /* Forms */
+  /* Forms - unchanged */
   form {
     display: flex;
     flex-direction: column;
@@ -82,7 +83,7 @@
     background: #fafafa;
     padding: 2rem 2.5rem 2.5rem;
     border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 12px rgba(63,81,181,0.15);
   }
   form input[type="text"],
   form input[type="password"] {
@@ -93,12 +94,13 @@
     font-size: 1rem;
     background: #fff;
     color: #111;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.3s ease;
   }
   form input[type="text"]:focus,
   form input[type="password"]:focus {
     outline: none;
     border-color: #3f51b5;
+    box-shadow: 0 0 6px rgba(63,81,181,0.4);
   }
   form button {
     background: #3f51b5;
@@ -111,11 +113,12 @@
     font-size: 1.1rem;
     letter-spacing: 0.05em;
     user-select: none;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
     margin-top: 10px;
   }
   form button:hover {
     background: #2c3a9a;
+    box-shadow: 0 4px 15px rgba(44,58,154,0.5);
   }
   #form-message {
     margin-top: 1rem;
@@ -126,37 +129,48 @@
     user-select: none;
     font-weight: 600;
   }
-  /* Sidebar */
+  /* Sidebar - enhanced styling */
   #sidebar {
     width: 320px;
-    background: #f9f9f9;
-    color: #333;
+    background: linear-gradient(to bottom, #3f51b5, #5c6bc0);
+    color: #f0f0f0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-right: 1px solid #ddd;
+    border-right: none;
+    box-shadow: 4px 0 12px rgba(63,81,181,0.4);
   }
   #sidebar header {
-    padding: 1rem;
-    font-size: 1.25rem;
+    padding: 1.5rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    background: #fff;
+    background: transparent;
     text-align: center;
     user-select: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
   #search-container {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
     flex-shrink: 0;
   }
   #search-input {
     width: 100%;
-    padding: 0.5rem 0.75rem;
-    border-radius: 5px;
-    border: 1px solid #bbb;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    border: none;
     font-size: 1rem;
     color: #222;
+    background: #f0f0f0;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  #search-input:focus {
+    outline: none;
+    box-shadow: 0 0 8px 2px rgba(63,81,181,0.7);
+    background: #fff;
   }
   #notes-list {
     flex-grow: 1;
@@ -167,23 +181,38 @@
   }
   #notes-list li {
     cursor: pointer;
-    padding: 0.6rem 1rem;
-    border-bottom: 1px solid #ddd;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     user-select: none;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    transition: background-color 0.15s ease;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #e8eaf6;
+    border-radius: 4px 0 0 4px;
   }
   #notes-list li:hover {
-    background: #e1e7fc;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
   }
   #notes-list li.selected {
-    background: #c5cee9;
-    font-weight: 600;
+    background: #283593;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: inset 4px 0 0 #ffca28;
+  }
+  /* Note icon before title */
+  #notes-list li::before {
+    content: "📝";
+    font-size: 1rem;
+    margin-right: 6px;
+    transform: translateY(1px);
   }
   .note-title-highlight {
     background-color: #f9f5c6;
@@ -193,72 +222,107 @@
   }
   .note-subtitle {
     font-size: 0.75rem;
-    opacity: 0.6;
-    color: #666;
+    opacity: 0.75;
+    color: #c5cae9;
   }
   #btn-new-note {
-    background: #3f51b5;
+    background: #ffca28;
     border: none;
     width: 100%;
-    padding: 0.75rem;
-    font-weight: bold;
+    padding: 0.85rem;
+    font-weight: 700;
     letter-spacing: 0.05em;
     cursor: pointer;
-    color: white;
-    transition: background 0.25s ease;
+    color: #283593;
+    transition: background 0.3s ease, color 0.3s ease;
     flex-shrink: 0;
-    border-radius: 0;
+    border-radius: 0 0 0 12px;
+    font-size: 1.1rem;
+    box-shadow: 0 -3px 10px rgba(255,202,40,0.3);
   }
   #btn-new-note:hover {
-    background: #2c3a9a;
+    background: #ffb300;
+    color: #1a237e;
   }
-  /* Main content */
+  /* Logout button */
+  #logout-btn {
+    background: #e53935;
+    font-weight: 700;
+    margin-top: auto;
+    border-radius: 0 0 0 12px;
+    flex-shrink: 0;
+    padding: 0.85rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.1rem;
+    box-shadow: 0 -3px 10px rgba(229,57,53,0.4);
+  }
+  #logout-btn:hover {
+    background: #b71c1c;
+    box-shadow: 0 0 14px rgba(183,28,28,0.75);
+  }
+  /* Main content - refined */
   #main-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     background: #fff;
-    padding: 1rem 1.5rem;
+    padding: 2rem 2.5rem;
     min-width: 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+    border-radius: 0 12px 12px 0;
   }
   #note-title {
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
-    border-bottom: 2px solid #3f51b5;
-    padding-bottom: 0.3rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 3px solid #3f51b5;
+    padding-bottom: 0.5rem;
     outline: none;
     width: 100%;
     background: transparent;
-    color: #111;
+    color: #222;
     resize: none;
+    transition: border-color 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  #note-title:focus {
+    border-color: #283593;
+    box-shadow: 0 0 8px 2px rgba(40,53,147,0.3);
   }
   #note-content {
     flex-grow: 1;
-    font-size: 1rem;
+    font-size: 1.1rem;
     border: none;
     outline: none;
     resize: none;
     width: 100%;
-    line-height: 1.5;
-    font-family: inherit;
+    line-height: 1.6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: transparent;
-    color: #111;
+    color: #333;
+    padding-right: 0.5rem;
+    transition: box-shadow 0.3s ease;
+  }
+  #note-content:focus {
+    box-shadow: inset 0 0 10px rgba(63,81,181,0.2);
   }
   #note-actions {
-    padding-top: 0.75rem;
+    padding-top: 1rem;
     text-align: right;
     display: flex;
-    gap: 16px;
+    gap: 20px;
   }
   .icon-button {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    transition: background-color 0.15s ease;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.25s ease, color 0.25s ease;
     color: #3f51b5;
     display: flex;
     align-items: center;
@@ -266,45 +330,32 @@
   }
   .icon-button:hover:not(:disabled) {
     background-color: #d8dffb;
+    color: #283593;
   }
   .icon-button:disabled {
-    color: #aaa;
+    color: #bbb;
     cursor: default;
   }
   .icon-button svg {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     fill: currentColor;
-  }
-  #logout-btn {
-    background: #b00020;
-    font-weight: 700;
-    margin-top: auto;
-    border-radius: 0;
-    flex-shrink: 0;
-    padding: 0.85rem;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  #logout-btn:hover {
-    background: #7a0015;
   }
   /* Scrollbar styling */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
     background: #f0f0f0;
+    border-radius: 6px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
+    background: #9fa8da;
+    border-radius: 6px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #a0a0a0;
+    background: #7986cb;
   }
   /* Responsive */
   @media (max-width: 768px) {
@@ -314,6 +365,9 @@
     #login-screen form {
       width: 90vw;
       max-width: 320px;
+    }
+    #main-content {
+      padding: 1.5rem 1.5rem 2rem;
     }
   }
 </style>
@@ -686,26 +740,6 @@
     noteSaved = false;
     renderLogin();
   });
-
-  function renderApp() {
-    loginScreen.style.display = 'none';
-    app.style.display = 'flex';
-    clearNoteFields();
-    renderNotesList();
-  }
-
-  function clearNoteFields() {
-    noteTitleInput.value = '';
-    noteContentInput.value = '';
-    setNoteEditable(true);
-  }
-
-  function setNoteEditable(editable) {
-    noteTitleInput.readOnly = !editable;
-    noteContentInput.readOnly = !editable;
-    noteSaved = !editable;
-    btnSaveNote.disabled = !editable;
-  }
 
   function initialize() {
     const loginData = loadLogin();
