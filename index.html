@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Black & White with Edit, Fullscreen, Text Size</title>
+<title>Notes App - Improved Fullscreen & Layout</title>
 <style>
   /* Reset and base */
   * {
@@ -151,6 +151,12 @@
     margin-bottom: 12px;
     letter-spacing: 0.1em;
   }
+  /* Changed sidebar header text color and content */
+  #sidebar header {
+    color: #00c853; /* optional bright green */
+  }
+  /* Change header text content via JS on init */
+
   #search-container {
     padding: 0.8rem 1rem;
     border-bottom: 1px solid #222;
@@ -286,13 +292,14 @@
     border-bottom-left-radius: 20px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.2);
   }
+  /* Reduced title font size and margins */
   #note-title {
     border: none;
-    font-size: var(--note-title-size, 1.8rem);
+    font-size: 1.3rem;
     font-weight: 700;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
     border-bottom: 3px solid #000;
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
     outline: none;
     width: 100%;
     background: transparent;
@@ -308,7 +315,7 @@
   }
   #note-content {
     flex-grow: 1;
-    font-size: var(--note-content-size, 1.15rem);
+    font-size: 1.15rem;
     border: none;
     outline: none;
     resize: none;
@@ -391,7 +398,8 @@
       box-shadow: none;
     }
   }
-  /* Fullscreen styles only for desktop */
+
+  /* Fullscreen styles for desktop */
   @media (min-width: 769px) {
     #main-content.fullscreen {
       position: fixed;
@@ -409,12 +417,52 @@
     #main-content.fullscreen #note-title {
       font-size: 2.8rem;
       border-bottom-width: 4px;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
     }
     #main-content.fullscreen #note-content {
       font-size: 1.6rem;
     }
     #main-content.fullscreen #note-actions {
       padding-top: 1.5rem;
+    }
+  }
+
+  /* Fullscreen styles for mobile/tablet */
+  @media (max-width: 768px) {
+    #main-content.fullscreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      padding: 1rem 1rem 3rem;
+      box-shadow: none;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0;
+    }
+    #main-content.fullscreen #note-title {
+      font-size: 1.8rem;
+      border-bottom-width: 3px;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.4rem;
+    }
+    #main-content.fullscreen #note-content {
+      font-size: 1.1rem;
+    }
+    #main-content.fullscreen #note-actions {
+      padding: 0.6rem 0;
+      gap: 10px;
+
+      /* Fix note actions on bottom on mobile fullscreen */
+      position: fixed;
+      bottom: 0;
+      left: 280px;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #ccc;
     }
   }
 </style>
@@ -448,7 +496,7 @@
 
 <div id="app" style="display:none;">
   <aside id="sidebar">
-    <header>My Notes</header>
+    <header id="sidebar-header">Quick Notes</header>
     <div id="search-container">
       <input type="search" id="search-input" placeholder="Search notes..." autocomplete="off" aria-label="Search notes" />
     </div>
@@ -514,11 +562,7 @@
   const searchInput = document.getElementById('search-input');
   const logoutBtn = document.getElementById('logout-btn');
   const mainContent = document.getElementById('main-content');
-
-  // Text size buttons
-  const txtSmallBtn = document.getElementById('txt-size-small');
-  const txtNormalBtn = document.getElementById('txt-size-normal');
-  const txtLargeBtn = document.getElementById('txt-size-large');
+  const sidebarHeader = document.getElementById('sidebar-header');
 
   let currentUser = null;
   let notes = [];
@@ -528,43 +572,10 @@
   let searchTimeout = null;
   let isFullscreen = false;
 
-  // Helpers for text size
-  function setTextSize(size) {
-    let titleSize, contentSize;
-    if(size === 'small') {
-      titleSize = '1.4rem';
-      contentSize = '0.9rem';
-    } else if(size === 'large') {
-      titleSize = '2.4rem';
-      contentSize = '1.4rem';
-    } else {
-      titleSize = '1.8rem';
-      contentSize = '1.15rem';
-    }
-    noteTitleInput.style.fontSize = titleSize;
-    noteContentInput.style.fontSize = contentSize;
+  // Set sidebar header text
+  sidebarHeader.textContent = "Quick Notes";
 
-    // Update active button visuals
-    txtSmallBtn.classList.toggle('active', size === 'small');
-    txtNormalBtn.classList.toggle('active', size === 'normal');
-    txtLargeBtn.classList.toggle('active', size === 'large');
-
-    txtSmallBtn.setAttribute('aria-pressed', size === 'small');
-    txtNormalBtn.setAttribute('aria-pressed', size === 'normal');
-    txtLargeBtn.setAttribute('aria-pressed', size === 'large');
-
-    localStorage.setItem('notesapp_textsize', size);
-  }
-
-  // Load text size from storage
-  function loadTextSize() {
-    const savedSize = localStorage.getItem('notesapp_textsize');
-    if(savedSize === 'small' || savedSize === 'large' || savedSize === 'normal') {
-      setTextSize(savedSize);
-    } else {
-      setTextSize('normal'); // default
-    }
-  }
+  // Reduced title font size and margin already in CSS
 
   function generateId() {
     return 'id-' + Math.random().toString(36).slice(2);
@@ -646,7 +657,6 @@
     app.style.display = 'flex';
     clearNoteFields();
     renderNotesList();
-    loadTextSize();
   }
 
   function clearNoteFields() {
@@ -861,10 +871,11 @@
     renderLogin();
   });
 
-  // Fullscreen toggle functionality only on screen width >= 769px
+  // Fullscreen toggle functionality
   btnFullscreen.addEventListener('click', () => {
-    if(window.innerWidth < 769) {
-      alert("Fullscreen mode is only available on desktop screens.");
+    // On smaller screens exit fullscreen if active since layout is adjusted
+    if (window.innerWidth <= 768 && !isFullscreen) {
+      alert("Fullscreen mode provides best experience on desktop screens.");
       return;
     }
     isFullscreen = !isFullscreen;
@@ -872,6 +883,8 @@
       mainContent.classList.add('fullscreen');
       btnFullscreen.title = "Exit fullscreen";
       btnFullscreen.setAttribute('aria-label', 'Exit fullscreen note');
+      // Scroll top on entering fullscreen for better reading
+      mainContent.scrollTop = 0;
     } else {
       mainContent.classList.remove('fullscreen');
       btnFullscreen.title = "Toggle fullscreen";
@@ -879,12 +892,10 @@
     }
   });
 
-  // Text size buttons event handlers
-  txtSmallBtn.addEventListener('click', () => setTextSize('small'));
-  txtNormalBtn.addEventListener('click', () => setTextSize('normal'));
-  txtLargeBtn.addEventListener('click', () => setTextSize('large'));
-
+  // Initialize
   function initialize() {
+    // Load sidebar header text - already set in HTML, so no JS needed
+
     const loginData = loadLogin();
     if (loginData) {
       const users = loadUsers();
@@ -899,9 +910,7 @@
   }
 
   initialize();
-
 })();
 </script>
 </body>
 </html>
-
