@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App with Signup, Login and Google Sheets Sync</title>
+<title>Notes App - Black & White with Edit Icon</title>
 <style>
   /* Reset and base */
   * {
@@ -12,8 +12,8 @@
   body, html {
     margin: 0; padding: 0; height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6fb;
-    color: #222;
+    background: #121212;
+    color: #f0f0f0;
     display: flex;
     flex-direction: column;
   }
@@ -21,9 +21,9 @@
     display: flex;
     flex: 1;
     min-height: 0;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+    background: #121212;
   }
-  /* Login/signup screen - unchanged as requested */
+  /* Login/signup screen - unchanged */
   #login-screen {
     display: flex;
     flex-direction: column;
@@ -129,47 +129,47 @@
     user-select: none;
     font-weight: 600;
   }
-  /* Sidebar - enhanced styling */
+  /* Sidebar - black & white theme */
   #sidebar {
-    width: 320px;
-    background: linear-gradient(to bottom, #3f51b5, #5c6bc0);
-    color: #f0f0f0;
+    width: 280px;
+    background: #000;
+    color: #fff;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-right: none;
-    box-shadow: 4px 0 12px rgba(63,81,181,0.4);
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 4px 0 20px rgba(255,255,255,0.1);
   }
   #sidebar header {
-    padding: 1.5rem;
-    font-size: 1.5rem;
+    padding: 1.75rem 1rem;
+    font-size: 1.7rem;
     font-weight: 700;
     background: transparent;
     text-align: center;
     user-select: none;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    letter-spacing: 0.05em;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
   }
   #search-container {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #222;
     flex-shrink: 0;
   }
   #search-input {
     width: 100%;
-    padding: 0.6rem 0.9rem;
-    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
     border: none;
     font-size: 1rem;
-    color: #222;
+    color: #000;
     background: #f0f0f0;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.1);
     transition: box-shadow 0.3s ease;
   }
   #search-input:focus {
     outline: none;
-    box-shadow: 0 0 8px 2px rgba(63,81,181,0.7);
+    box-shadow: 0 0 10px 3px #888;
     background: #fff;
   }
   #notes-list {
@@ -181,89 +181,77 @@
   }
   #notes-list li {
     cursor: pointer;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid #111;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     user-select: none;
     display: flex;
-    flex-direction: row;
     align-items: center;
     gap: 12px;
-    font-weight: 500;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 1.05rem;
     transition: background-color 0.3s ease, color 0.3s ease;
-    color: #e8eaf6;
-    border-radius: 4px 0 0 4px;
+    color: #ddd;
+    border-radius: 10px 0 0 10px;
   }
   #notes-list li:hover {
-    background: rgba(255,255,255,0.15);
+    background: #222;
     color: #fff;
   }
   #notes-list li.selected {
-    background: #283593;
+    background: #fff;
+    color: #000;
     font-weight: 700;
-    color: #fff;
-    box-shadow: inset 4px 0 0 #ffca28;
+    box-shadow: inset 5px 0 0 #000;
   }
   /* Note icon before title */
   #notes-list li::before {
-    content: "📝";
-    font-size: 1rem;
+    content: "🗒️";
+    font-size: 1.2rem;
     margin-right: 6px;
     transform: translateY(1px);
   }
-  .note-title-highlight {
-    background-color: #f9f5c6;
-    border-radius: 3px;
-    padding: 0 2px;
-    color: #333;
-  }
-  .note-subtitle {
-    font-size: 0.75rem;
-    opacity: 0.75;
-    color: #c5cae9;
-  }
+  /* New note button */
   #btn-new-note {
-    background: #ffca28;
-    border: none;
+    background: transparent;
+    border: 2px solid #fff;
     width: 100%;
     padding: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
     cursor: pointer;
-    color: #283593;
-    transition: background 0.3s ease, color 0.3s ease;
-    flex-shrink: 0;
-    border-radius: 0 0 0 12px;
+    color: #fff;
+    transition: background 0.2s ease, color 0.2s ease;
+    letter-spacing: 0.06em;
+    border-radius: 0 0 20px 20px;
     font-size: 1.1rem;
-    box-shadow: 0 -3px 10px rgba(255,202,40,0.3);
+    user-select: none;
   }
   #btn-new-note:hover {
-    background: #ffb300;
-    color: #1a237e;
+    background: #fff;
+    color: #000;
   }
   /* Logout button */
   #logout-btn {
-    background: #e53935;
+    background: #222;
     font-weight: 700;
     margin-top: auto;
-    border-radius: 0 0 0 12px;
+    border-radius: 0;
     flex-shrink: 0;
-    padding: 0.85rem;
-    color: white;
+    padding: 1rem;
+    color: #fff;
     border: none;
     cursor: pointer;
+    letter-spacing: 0.05em;
     transition: background 0.3s ease, box-shadow 0.3s ease;
     font-size: 1.1rem;
-    box-shadow: 0 -3px 10px rgba(229,57,53,0.4);
   }
   #logout-btn:hover {
-    background: #b71c1c;
-    box-shadow: 0 0 14px rgba(183,28,28,0.75);
+    background: #444;
+    box-shadow: 0 0 8px #fff;
   }
-  /* Main content - refined */
+  /* Main content - white background, black text */
   #main-content {
     flex-grow: 1;
     display: flex;
@@ -271,31 +259,33 @@
     background: #fff;
     padding: 2rem 2.5rem;
     min-width: 0;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
-    border-radius: 0 12px 12px 0;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
   }
   #note-title {
     border: none;
-    font-size: 1.75rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    margin-bottom: 0.75rem;
-    border-bottom: 3px solid #3f51b5;
+    margin-bottom: 0.8rem;
+    border-bottom: 3px solid #000;
     padding-bottom: 0.5rem;
     outline: none;
     width: 100%;
     background: transparent;
-    color: #222;
+    color: #111;
     resize: none;
-    transition: border-color 0.3s ease;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease;
+    border-radius: 12px 12px 0 0;
   }
   #note-title:focus {
-    border-color: #283593;
-    box-shadow: 0 0 8px 2px rgba(40,53,147,0.3);
+    border-color: #000;
+    box-shadow: 0 0 10px 3px #555;
   }
   #note-content {
     flex-grow: 1;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     border: none;
     outline: none;
     resize: none;
@@ -303,42 +293,46 @@
     line-height: 1.6;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: transparent;
-    color: #333;
-    padding-right: 0.5rem;
+    color: #222;
+    padding: 0.75rem 0.75rem 0.5rem 0.75rem;
     transition: box-shadow 0.3s ease;
   }
   #note-content:focus {
-    box-shadow: inset 0 0 10px rgba(63,81,181,0.2);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
   }
   #note-actions {
-    padding-top: 1rem;
+    padding-top: 1.1rem;
     text-align: right;
     display: flex;
-    gap: 20px;
+    gap: 14px;
   }
   .icon-button {
     background: none;
-    border: none;
+    border: 2px solid #000;
     cursor: pointer;
     padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.25s ease, color 0.25s ease;
-    color: #3f51b5;
+    border-radius: 12px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 44px;
+    height: 44px;
   }
   .icon-button:hover:not(:disabled) {
-    background-color: #d8dffb;
-    color: #283593;
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
   }
   .icon-button:disabled {
-    color: #bbb;
+    color: #aaa;
+    border-color: #aaa;
     cursor: default;
   }
   .icon-button svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     fill: currentColor;
   }
   /* Scrollbar styling */
@@ -347,27 +341,31 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 6px;
+    background: #ddd;
+    border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #9fa8da;
-    border-radius: 6px;
+    background: #999;
+    border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #7986cb;
+    background: #666;
   }
   /* Responsive */
   @media (max-width: 768px) {
     #sidebar {
-      width: 240px;
+      width: 220px;
+      border-radius: 0;
+      box-shadow: none;
     }
     #login-screen form {
       width: 90vw;
       max-width: 320px;
     }
     #main-content {
-      padding: 1.5rem 1.5rem 2rem;
+      padding: 1.5rem 1rem;
+      border-radius: 0;
+      box-shadow: none;
     }
   }
 </style>
@@ -413,12 +411,17 @@
     <input id="note-title" type="text" placeholder="Note Title" aria-label="Note title" />
     <textarea id="note-content" placeholder="Start typing your note here..." aria-label="Note content"></textarea>
     <div id="note-actions">
-      <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note">
+      <button id="btn-edit-note" class="icon-button" aria-label="Edit note" title="Edit note">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM22.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+        </svg>
+      </button>
+      <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note" disabled>
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM9 9h6v6H9V9z"></path>
         </svg>
       </button>
-      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d32f2f;">
+      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d32f2f; border-color: #d32f2f;">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"></path>
         </svg>
@@ -445,6 +448,7 @@
   const noteTitleInput = document.getElementById('note-title');
   const noteContentInput = document.getElementById('note-content');
   const btnNewNote = document.getElementById('btn-new-note');
+  const btnEditNote = document.getElementById('btn-edit-note');
   const btnSaveNote = document.getElementById('btn-save-note');
   const btnDeleteNote = document.getElementById('btn-delete-note');
   const searchInput = document.getElementById('search-input');
@@ -454,7 +458,7 @@
   let notes = [];
   let filteredNotes = [];
   let selectedNoteId = null;
-  let noteSaved = false;
+  let noteSaved = true;
   let searchTimeout = null;
 
   function generateId() {
@@ -542,14 +546,15 @@
   function clearNoteFields() {
     noteTitleInput.value = '';
     noteContentInput.value = '';
-    setNoteEditable(true);
+    setNoteEditable(false);
   }
-
+  // Sets edit mode and controls fields/buttons accordingly
   function setNoteEditable(editable) {
     noteTitleInput.readOnly = !editable;
     noteContentInput.readOnly = !editable;
     noteSaved = !editable;
     btnSaveNote.disabled = !editable;
+    btnEditNote.disabled = editable; // Disable edit if already editing
   }
 
   function renderNotesList() {
@@ -589,22 +594,22 @@
     if (!note) {
       clearNoteFields();
       btnDeleteNote.disabled = true;
+      btnEditNote.disabled = true;
       setNoteEditable(false);
+      btnSaveNote.disabled = true;
     } else {
       noteTitleInput.value = note.title;
       noteContentInput.value = note.content;
       btnDeleteNote.disabled = false;
-      if (noteSaved) {
-        setNoteEditable(false);
-      } else {
-        setNoteEditable(true);
-      }
+      btnEditNote.disabled = false;
+      setNoteEditable(false);
+      btnSaveNote.disabled = true;
     }
   }
 
   function selectNote(id) {
     selectedNoteId = id;
-    noteSaved = false;
+    noteSaved = true;
     renderNotesList();
     const note = notes.find(n => n.id === id);
     renderNote(note);
@@ -681,6 +686,16 @@
     saveNotesLocal();
     renderNotesList();
     renderNote(newNote);
+    setNoteEditable(true);
+    btnSaveNote.disabled = false;
+  });
+
+  btnEditNote.addEventListener('click', () => {
+    if (!selectedNoteId) {
+      alert('No note selected to edit.');
+      return;
+    }
+    setNoteEditable(true);
   });
 
   btnSaveNote.addEventListener('click', () => {
@@ -710,7 +725,6 @@
     saveNotesLocal();
     noteSaved = true;
     setNoteEditable(false);
-    renderNotesList();
   });
 
   btnDeleteNote.addEventListener('click', () => {
@@ -719,7 +733,7 @@
     notes = notes.filter(n => n.id !== selectedNoteId);
     saveNotesLocal();
     selectedNoteId = null;
-    noteSaved = false;
+    noteSaved = true;
     renderNotesList();
     renderNote(null);
   });
@@ -737,7 +751,7 @@
     notes = [];
     filteredNotes = [];
     selectedNoteId = null;
-    noteSaved = false;
+    noteSaved = true;
     renderLogin();
   });
 
@@ -760,4 +774,5 @@
 </script>
 </body>
 </html>
+
 
