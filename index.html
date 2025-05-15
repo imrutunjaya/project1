@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Black & White with Edit Icon</title>
+<title>Notes App - Black & White with Edit Icon and Fullscreen</title>
 <style>
   /* Reset and base */
   * {
@@ -166,6 +166,7 @@
     background: #f0f0f0;
     box-shadow: inset 0 3px 8px rgba(0,0,0,0.1);
     transition: box-shadow 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   #search-input:focus {
     outline: none;
@@ -206,14 +207,12 @@
     font-weight: 700;
     box-shadow: inset 5px 0 0 #000;
   }
-  /* Note icon before title */
   #notes-list li::before {
     content: "🗒️";
     font-size: 1.2rem;
     margin-right: 6px;
     transform: translateY(1px);
   }
-  /* New note button */
   #btn-new-note {
     background: transparent;
     border: 2px solid #fff;
@@ -232,7 +231,6 @@
     background: #fff;
     color: #000;
   }
-  /* Logout button */
   #logout-btn {
     background: #222;
     font-weight: 700;
@@ -368,6 +366,31 @@
       box-shadow: none;
     }
   }
+
+  /* Fullscreen styles */
+  #main-content.fullscreen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 3rem 4rem;
+    background: #fff;
+    box-shadow: none;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+  }
+  #main-content.fullscreen #note-title {
+    font-size: 2.8rem;
+    border-bottom-width: 4px;
+  }
+  #main-content.fullscreen #note-content {
+    font-size: 1.6rem;
+  }
+  #main-content.fullscreen #note-actions {
+    padding-top: 1.5rem;
+  }
 </style>
 </head>
 <body>
@@ -426,6 +449,11 @@
           <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"></path>
         </svg>
       </button>
+      <button id="btn-fullscreen" class="icon-button" aria-label="Toggle fullscreen note" title="Toggle fullscreen">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:22px; height:22px;">
+          <path d="M7 14H5v5h5v-2H7v-3zm10-7h-3v2h3v3h2v-5h-2zm-3 10h3v3h-5v-2h3v-1zm-7-7h3v-2H7v-3H5v5h2z"/>
+        </svg>
+      </button>
     </div>
   </main>
 </div>
@@ -451,8 +479,10 @@
   const btnEditNote = document.getElementById('btn-edit-note');
   const btnSaveNote = document.getElementById('btn-save-note');
   const btnDeleteNote = document.getElementById('btn-delete-note');
+  const btnFullscreen = document.getElementById('btn-fullscreen');
   const searchInput = document.getElementById('search-input');
   const logoutBtn = document.getElementById('logout-btn');
+  const mainContent = document.getElementById('main-content');
 
   let currentUser = null;
   let notes = [];
@@ -460,6 +490,7 @@
   let selectedNoteId = null;
   let noteSaved = true;
   let searchTimeout = null;
+  let isFullscreen = false;
 
   function generateId() {
     return 'id-' + Math.random().toString(36).slice(2);
@@ -755,6 +786,20 @@
     renderLogin();
   });
 
+  // Fullscreen toggle functionality
+  btnFullscreen.addEventListener('click', () => {
+    isFullscreen = !isFullscreen;
+    if (isFullscreen) {
+      mainContent.classList.add('fullscreen');
+      btnFullscreen.title = "Exit fullscreen";
+      btnFullscreen.setAttribute('aria-label', 'Exit fullscreen note');
+    } else {
+      mainContent.classList.remove('fullscreen');
+      btnFullscreen.title = "Toggle fullscreen";
+      btnFullscreen.setAttribute('aria-label', 'Toggle fullscreen note');
+    }
+  });
+
   function initialize() {
     const loginData = loadLogin();
     if (loginData) {
@@ -774,5 +819,4 @@
 </script>
 </body>
 </html>
-
 
