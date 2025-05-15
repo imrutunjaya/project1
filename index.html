@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Updated Fullscreen with Text Size Sync</title>
+<title>Notes App - Sidebar Enhanced with Categories</title>
 <style>
   /* Reset and base */
   * {
@@ -129,7 +129,7 @@
     user-select: none;
     font-weight: 600;
   }
-  /* Sidebar - black & white theme */
+  /* Sidebar - black & white */
   #sidebar {
     width: 280px;
     background: #000;
@@ -140,10 +140,6 @@
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
     box-shadow: 4px 0 20px rgba(255,255,255,0.1);
-  }
-  /* Removed header text, replaced with searchbar container only */
-  #sidebar header {
-    display: none;
   }
   #search-container {
     padding: 1.75rem 1rem 0.75rem;
@@ -166,6 +162,36 @@
     outline: none;
     box-shadow: 0 0 10px 3px #888;
     background: #fff;
+  }
+  /* Category bar - hidden by default */
+  #category-bar {
+    display: none;
+    padding: 0.5rem 1rem;
+    background: #111;
+    border-bottom: 1px solid #333;
+    flex-shrink: 0;
+  }
+  #category-bar.active {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  #category-bar button {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #category-bar button:hover,
+  #category-bar button.active {
+    background-color: #fff;
+    color: #000;
   }
   #notes-list {
     flex-grow: 1;
@@ -225,23 +251,91 @@
     background: #fff;
     color: #000;
   }
+  /* Container for logout, dictionary, and toggle */
+  #sidebar-bottom {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #222;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  /* Logout button smaller height */
   #logout-btn {
     background: #222;
     font-weight: 700;
-    margin-top: auto;
-    border-radius: 0;
-    flex-shrink: 0;
-    padding: 1rem;
+    /* reduced padding & height */
+    padding: 0.55rem 1rem;
+    height: 36px;
+    border-radius: 8px;
     color: #fff;
     border: none;
     cursor: pointer;
     letter-spacing: 0.05em;
     transition: background 0.3s ease, box-shadow 0.3s ease;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    flex-shrink: 0;
   }
   #logout-btn:hover {
     background: #444;
     box-shadow: 0 0 8px #fff;
+  }
+  /* Dictionary + toggle container */
+  #dict-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Dictionary button */
+  #btn-dictionary {
+    background: transparent;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  #btn-dictionary:hover {
+    background: #fff;
+    color: #000;
+  }
+  /* Dictionary icon */
+  #btn-dictionary svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+  /* Toggle button with right arrow */
+  #btn-category-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    user-select: none;
+    color: #fff;
+  }
+  #btn-category-toggle.rotated {
+    transform: rotate(90deg);
+  }
+  /* Arrow right icon style */
+  #btn-category-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
   }
   /* Text size controls container */
   #text-size-control {
@@ -387,7 +481,6 @@
       border-radius: 0;
       box-shadow: none;
     }
-    /* Mobile-specific fullscreen note actions fix */
     #main-content.fullscreen #note-actions {
       position: fixed;
       bottom: 0;
@@ -464,9 +557,25 @@
     <div id="search-container">
       <input type="search" id="search-input" placeholder="Search notes..." autocomplete="off" aria-label="Search notes" />
     </div>
+    <div id="category-bar" aria-label="Category selection" role="group">
+      <button class="category-button active" data-category="notes">Notes</button>
+      <button class="category-button" data-category="book">Book</button>
+      <button class="category-button" data-category="syllabus">Syllabus</button>
+    </div>
     <ul id="notes-list" role="listbox" tabindex="0" aria-label="List of notes"></ul>
     <button id="btn-new-note" aria-label="Create new note">+ New Note</button>
-    <button id="logout-btn" aria-label="Logout">Logout</button>
+    <div id="sidebar-bottom">
+      <button id="btn-dictionary" type="button" aria-label="Open dictionary" title="Open Dictionary">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2L2 7v13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7l-10-5zM4 8.32l8 4.5 8-4.5V18H4V8.32zm8-3.3 8-4-8-4-8 4 8 4z"/></svg>
+        Dictionary
+      </button>
+      <button id="btn-category-toggle" aria-label="Toggle category bar" title="Toggle categories" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+      <button id="logout-btn" aria-label="Logout">Logout</button>
+    </div>
     <div id="text-size-control" aria-label="Text size controls" role="group">
       <button id="txt-size-small" aria-pressed="false" title="Small text size">Small</button>
       <button id="txt-size-normal" aria-pressed="true" title="Normal text size" class="active">Normal</button>
@@ -503,6 +612,7 @@
 
 <script>
 (() => {
+  // Elements declared
   const loginScreen = document.getElementById('login-screen');
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
@@ -526,11 +636,13 @@
   const searchInput = document.getElementById('search-input');
   const logoutBtn = document.getElementById('logout-btn');
   const mainContent = document.getElementById('main-content');
-
-  // Text size buttons and container
+  const textSizeControl = document.getElementById('text-size-control');
   const txtSmallBtn = document.getElementById('txt-size-small');
   const txtNormalBtn = document.getElementById('txt-size-normal');
   const txtLargeBtn = document.getElementById('txt-size-large');
+  const categoryBar = document.getElementById('category-bar');
+  const btnCategoryToggle = document.getElementById('btn-category-toggle');
+  const btnDictionary = document.getElementById('btn-dictionary');
 
   let currentUser = null;
   let notes = [];
@@ -556,15 +668,8 @@
     }
     noteTitleInput.style.fontSize = titleSize;
     noteContentInput.style.fontSize = contentSize;
-
-    // If fullscreen active, sync fullscreen font sizes too (they inherit now)
-    if(isFullscreen) {
-      // fullscreen uses same inputs, so no extra sync needed
-    }
-
     currentTextSize = size;
 
-    // Update active button visuals
     txtSmallBtn.classList.toggle('active', size === 'small');
     txtNormalBtn.classList.toggle('active', size === 'normal');
     txtLargeBtn.classList.toggle('active', size === 'large');
@@ -669,13 +774,12 @@
     noteContentInput.value = '';
     setNoteEditable(false);
   }
-  // Sets edit mode and controls fields/buttons accordingly
   function setNoteEditable(editable) {
     noteTitleInput.readOnly = !editable;
     noteContentInput.readOnly = !editable;
     noteSaved = !editable;
     btnSaveNote.disabled = !editable;
-    btnEditNote.disabled = editable; // Disable edit if already editing
+    btnEditNote.disabled = editable; // disable edit button during editing
   }
 
   function renderNotesList() {
@@ -888,22 +992,32 @@
       btnFullscreen.title = "Exit fullscreen";
       btnFullscreen.setAttribute('aria-label', 'Exit fullscreen note');
       mainContent.scrollTop = 0;
-      // Ensure text size is reflected properly in fullscreen
       setTextSize(currentTextSize);
     } else {
       mainContent.classList.remove('fullscreen');
       btnFullscreen.title = "Toggle fullscreen";
       btnFullscreen.setAttribute('aria-label', 'Toggle fullscreen note');
-      // Reset text size in case of any changes
       setTextSize(currentTextSize);
     }
   });
 
-  // Text size buttons event handlers
+  // Text size buttons
   txtSmallBtn.addEventListener('click', () => setTextSize('small'));
   txtNormalBtn.addEventListener('click', () => setTextSize('normal'));
   txtLargeBtn.addEventListener('click', () => setTextSize('large'));
 
+  // Category bar toggle and dictionary button
+  btnCategoryToggle.addEventListener('click', () => {
+    const isActive = categoryBar.classList.toggle('active');
+    btnCategoryToggle.classList.toggle('rotated', isActive);
+    btnCategoryToggle.setAttribute('aria-expanded', isActive.toString());
+  });
+
+  btnDictionary.addEventListener('click', () => {
+    alert("Dictionary feature not implemented yet.");
+  });
+
+  // Initialize
   function initialize() {
     const loginData = loadLogin();
     if (loginData) {
@@ -923,4 +1037,3 @@
 </script>
 </body>
 </html>
-
