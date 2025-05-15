@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Black & White with Edit Icon and Fullscreen</title>
+<title>Notes App - Black & White with Edit, Fullscreen, Text Size</title>
 <style>
   /* Reset and base */
   * {
@@ -249,6 +249,31 @@
     background: #444;
     box-shadow: 0 0 8px #fff;
   }
+  /* Text size controls container */
+  #text-size-control {
+    padding: 0.7rem 1rem;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    user-select: none;
+  }
+  #text-size-control button {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 1rem;
+    padding: 0.35rem 0.75rem;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  #text-size-control button.active,
+  #text-size-control button:hover {
+    background: #fff;
+    color: #000;
+  }
   /* Main content - white background, black text */
   #main-content {
     flex-grow: 1;
@@ -263,7 +288,7 @@
   }
   #note-title {
     border: none;
-    font-size: 1.8rem;
+    font-size: var(--note-title-size, 1.8rem);
     font-weight: 700;
     margin-bottom: 0.8rem;
     border-bottom: 3px solid #000;
@@ -283,7 +308,7 @@
   }
   #note-content {
     flex-grow: 1;
-    font-size: 1.15rem;
+    font-size: var(--note-content-size, 1.15rem);
     border: none;
     outline: none;
     resize: none;
@@ -366,30 +391,31 @@
       box-shadow: none;
     }
   }
-
-  /* Fullscreen styles */
-  #main-content.fullscreen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    border-radius: 0;
-    padding: 3rem 4rem;
-    background: #fff;
-    box-shadow: none;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-  }
-  #main-content.fullscreen #note-title {
-    font-size: 2.8rem;
-    border-bottom-width: 4px;
-  }
-  #main-content.fullscreen #note-content {
-    font-size: 1.6rem;
-  }
-  #main-content.fullscreen #note-actions {
-    padding-top: 1.5rem;
+  /* Fullscreen styles only for desktop */
+  @media (min-width: 769px) {
+    #main-content.fullscreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      padding: 3rem 4rem;
+      background: #fff;
+      box-shadow: none;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+    }
+    #main-content.fullscreen #note-title {
+      font-size: 2.8rem;
+      border-bottom-width: 4px;
+    }
+    #main-content.fullscreen #note-content {
+      font-size: 1.6rem;
+    }
+    #main-content.fullscreen #note-actions {
+      padding-top: 1.5rem;
+    }
   }
 </style>
 </head>
@@ -429,6 +455,11 @@
     <ul id="notes-list" role="listbox" tabindex="0" aria-label="List of notes"></ul>
     <button id="btn-new-note" aria-label="Create new note">+ New Note</button>
     <button id="logout-btn" aria-label="Logout">Logout</button>
+    <div id="text-size-control" aria-label="Text size controls" role="group">
+      <button id="txt-size-small" aria-pressed="false" title="Small text size">Small</button>
+      <button id="txt-size-normal" aria-pressed="true" title="Normal text size" class="active">Normal</button>
+      <button id="txt-size-large" aria-pressed="false" title="Large text size">Large</button>
+    </div>
   </aside>
   <main id="main-content" aria-live="polite">
     <input id="note-title" type="text" placeholder="Note Title" aria-label="Note title" />
@@ -484,6 +515,11 @@
   const logoutBtn = document.getElementById('logout-btn');
   const mainContent = document.getElementById('main-content');
 
+  // Text size buttons
+  const txtSmallBtn = document.getElementById('txt-size-small');
+  const txtNormalBtn = document.getElementById('txt-size-normal');
+  const txtLargeBtn = document.getElementById('txt-size-large');
+
   let currentUser = null;
   let notes = [];
   let filteredNotes = [];
@@ -491,6 +527,44 @@
   let noteSaved = true;
   let searchTimeout = null;
   let isFullscreen = false;
+
+  // Helpers for text size
+  function setTextSize(size) {
+    let titleSize, contentSize;
+    if(size === 'small') {
+      titleSize = '1.4rem';
+      contentSize = '0.9rem';
+    } else if(size === 'large') {
+      titleSize = '2.4rem';
+      contentSize = '1.4rem';
+    } else {
+      titleSize = '1.8rem';
+      contentSize = '1.15rem';
+    }
+    noteTitleInput.style.fontSize = titleSize;
+    noteContentInput.style.fontSize = contentSize;
+
+    // Update active button visuals
+    txtSmallBtn.classList.toggle('active', size === 'small');
+    txtNormalBtn.classList.toggle('active', size === 'normal');
+    txtLargeBtn.classList.toggle('active', size === 'large');
+
+    txtSmallBtn.setAttribute('aria-pressed', size === 'small');
+    txtNormalBtn.setAttribute('aria-pressed', size === 'normal');
+    txtLargeBtn.setAttribute('aria-pressed', size === 'large');
+
+    localStorage.setItem('notesapp_textsize', size);
+  }
+
+  // Load text size from storage
+  function loadTextSize() {
+    const savedSize = localStorage.getItem('notesapp_textsize');
+    if(savedSize === 'small' || savedSize === 'large' || savedSize === 'normal') {
+      setTextSize(savedSize);
+    } else {
+      setTextSize('normal'); // default
+    }
+  }
 
   function generateId() {
     return 'id-' + Math.random().toString(36).slice(2);
@@ -572,6 +646,7 @@
     app.style.display = 'flex';
     clearNoteFields();
     renderNotesList();
+    loadTextSize();
   }
 
   function clearNoteFields() {
@@ -786,8 +861,12 @@
     renderLogin();
   });
 
-  // Fullscreen toggle functionality
+  // Fullscreen toggle functionality only on screen width >= 769px
   btnFullscreen.addEventListener('click', () => {
+    if(window.innerWidth < 769) {
+      alert("Fullscreen mode is only available on desktop screens.");
+      return;
+    }
     isFullscreen = !isFullscreen;
     if (isFullscreen) {
       mainContent.classList.add('fullscreen');
@@ -799,6 +878,11 @@
       btnFullscreen.setAttribute('aria-label', 'Toggle fullscreen note');
     }
   });
+
+  // Text size buttons event handlers
+  txtSmallBtn.addEventListener('click', () => setTextSize('small'));
+  txtNormalBtn.addEventListener('click', () => setTextSize('normal'));
+  txtLargeBtn.addEventListener('click', () => setTextSize('large'));
 
   function initialize() {
     const loginData = loadLogin();
@@ -815,6 +899,7 @@
   }
 
   initialize();
+
 })();
 </script>
 </body>
